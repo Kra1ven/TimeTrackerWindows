@@ -1,5 +1,5 @@
 # TimeTrackerWindows
-An app made on Python to tack the time you spend on each active window.
+An app made on Python to track the time you spend on each active window.
 
 Use PyInstaller to compile "ttw.py" into an exe file. Note - After launch, a db file will be created to store data.
 
