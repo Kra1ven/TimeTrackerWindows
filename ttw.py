@@ -39,8 +39,8 @@ def wathdog():
 		elif Running == False:
 			DBhandle.DBstore(x.replace("'", ""), counter)
 			quit()
-		elif Running == "Paused":
-			while Running == "Paused":
+		elif Running == "Paused" or Running == "Afk":
+			while Running == "Paused" or Running == "Afk":
 				time.sleep(1)
 
 
@@ -49,18 +49,18 @@ def mouseTrack():
 	global Running
 	x = pyautogui.position()
 	counter = 0
+	global count
 	count = True
 	while True:
-		if x == pyautogui.position() and counter == 1200:
-			Running = "Paused"
+		if x == pyautogui.position() and counter == 4:
+			Running = "Afk"
 			count = False
 			counter = 0
 		elif not Running:
 			break
-		elif x != pyautogui.position() and Running == "Paused":
+		elif x != pyautogui.position() and Running == "Afk":
 			Running = True
 			count = True
-
 		if x != pyautogui.position():
 			x = pyautogui.position()
 			counter = 0
@@ -136,6 +136,8 @@ def DisplayData(DateRange):
 def CurrentState():
 	if Running == "Paused":
 		ui.State.setText("Paused")
+	elif Running == "Afk":
+		ui.State.setText("Paused")
 	else:
 		ui.State.setText("Running")
 
@@ -146,8 +148,10 @@ def Closing():
 
 def Pause():
 	global Running
+	global count
 	if Running == "Paused":
 		Running = True
+		count = True
 	elif Running:
 		Running = "Paused"
 
@@ -168,7 +172,7 @@ def Sublime():
 def GoogleChrome():
 	DisplayData("Google Chrome")
 
-# TKINTER GUI
+# QT GUI
 class Ui_MainWindow(object):
 	def __init__(self, MainWindow):
 		MainWindow.setObjectName("MainWindow")
@@ -326,9 +330,8 @@ class Ui_MainWindow(object):
 		self.State.setText(_translate("MainWindow", "State"))
 
 	def closeEvent(self, event):
-		# do stuff
 		if can_exit:
-			event.accept() # let the window close
+			event.accept()
 		else:
 			event.ignore()
 
