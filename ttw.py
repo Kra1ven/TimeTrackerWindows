@@ -52,7 +52,7 @@ def mouseTrack():
 	global count
 	count = True
 	while True:
-		if x == pyautogui.position() and counter == 4:
+		if x == pyautogui.position() and counter == 1200:
 			Running = "Afk"
 			count = False
 			counter = 0
