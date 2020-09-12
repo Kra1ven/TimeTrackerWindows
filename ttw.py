@@ -51,7 +51,7 @@ def mouseTrack():
 	counter = 0
 	count = True
 	while True:
-		if x == pyautogui.position() and counter == 12:
+		if x == pyautogui.position() and counter == 1200:
 			Running = "Paused"
 			count = False
 			counter = 0
