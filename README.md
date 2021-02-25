@@ -5,6 +5,6 @@ Use PyInstaller to compile "ttw.py" into an exe file. Note - After launch, a db 
 
 Features:
 -Pause button
--Supported apps (Google Chrome, Sublime Text)
+-Supported apps, as individual trackers for tabs and projects (Google Chrome, Sublime Text)
 -App status
 -AutoPause when user afk for more than 20 min (Also sets app status to Running when active again)
