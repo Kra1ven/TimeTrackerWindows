@@ -1,4 +1,5 @@
 from win32gui import GetWindowText, GetForegroundWindow
+import win32api
 import pyautogui
 import time
 import threading
@@ -10,19 +11,13 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
 from DBmanage import DBhandle
-from matplotlib import pyplot as plt
-import matplotlib.backends.backend_tkagg
-import matplotlib.backends.backend_svg
 import os
 import sys
 import math
 
-# APP RUNNING STATE
 Running = True
 
-
-# CHECKING CURRENT WINDOW WITH TIMER
-def wathdog():
+def watchdog():
 	t0 = time.time()
 	while True:
 		x = GetWindowText(GetForegroundWindow())
@@ -32,51 +27,43 @@ def wathdog():
 			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
 			thrd.start()
 			t0 = time.time()
-		elif math.floor(time.time() - t0) == 60:
+		elif math.floor(time.time() - t0) >= 60:
 			t1 = time.time()
 			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
 			thrd.start()
 			t0 = time.time()
 		elif Running == False:
-			DBhandle.DBstore(x.replace("'", ""), counter)
-			quit()
+			t1 = time.time()
+			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
+			thrd.start()
+			break
 		elif Running == "Paused" or Running == "Afk":
+			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
+			thrd.start()
 			while Running == "Paused" or Running == "Afk":
 				time.sleep(1)
+			t0 = time.time()
 
 
-# CHECKING IF USER AFK TO PAUSE
-def mouseTrack():
+def inputTrack():
 	global Running
-	x = pyautogui.position()
-	counter = 0
-	global count
-	count = True
 	while True:
-		if x == pyautogui.position() and counter == 1200:
+		x = (win32api.GetTickCount() - win32api.GetLastInputInfo()) / 1000
+		if x >= 1200:
 			Running = "Afk"
-			count = False
-			counter = 0
 		elif not Running:
 			break
-		elif x != pyautogui.position() and Running == "Afk":
+		elif x < 1200 and Running == "Afk":
 			Running = True
-			count = True
-		if x != pyautogui.position():
-			x = pyautogui.position()
-			counter = 0
-
-		time.sleep(2)
-		if count:
-			counter += 2
+		time.sleep(1)
 
 
 # STARTING THE MAIN WATCHDOG AND MOUSETRACK FUNCTION
-main_thread = threading.Thread(target=wathdog)
+main_thread = threading.Thread(target=watchdog)
 main_thread.start()
 
-mouse_thread = threading.Thread(target=mouseTrack)
-mouse_thread.start()
+input_thread = threading.Thread(target=inputTrack)
+input_thread.start()
 
 
 # EXTERNAL FUNCTIONS
@@ -86,9 +73,21 @@ header = "Weekly"
 class window(QWidget):
 		def __init__(self, parent=None):
 			QWidget.__init__(self, parent)
-			self.set0 = QBarSet(f'Hours')
-			
-			self.set0.append([float(x) for x in data.values()])
+
+			self.maxVal = float(list(data.values())[0])
+
+			if self.maxVal * 60 < 1:
+				self.set0 = QBarSet('Seconds')
+				self.set0.append([round(float(x) * 60 * 60, 1) for x in data.values()])
+				self.maxVal = round(self.maxVal * 60 * 60, 1)
+			elif self.maxVal < 1:
+				self.set0 = QBarSet('Minutes')
+				self.set0.append([round(float(x) * 60, 1) for x in data.values()])
+				self.maxVal = round(self.maxVal * 60, 1)
+			else:
+				self.set0 = QBarSet('Hours')
+				self.set0.append([round(float(x), 1) for x in data.values()])
+				self.maxVal = round(self.maxVal, 1)
 			
 			self.series = QBarSeries()
 			self.series.append(self.set0)
@@ -106,10 +105,10 @@ class window(QWidget):
 
 			self.axisY = QValueAxis()
 			try: 
-				self.axisY.setRange(0, float(list(data.values())[0]))
-				if (float(list(data.values())[0])) > 19:
+				self.axisY.setRange(0, self.maxVal)
+				if self.maxVal > 19:
 				    self.axisY.setTickCount(15)
-				elif (float(list(data.values())[0])) > 10:
+				elif self.maxVal > 10:
 				    self.axisY.setTickCount(10)
 				else:
 				    self.axisY.setTickCount(5)
@@ -139,14 +138,11 @@ def CurrentState():
 def Closing():
 	global Running
 	Running = False
-	quit()
 
 def Pause():
 	global Running
-	global count
 	if Running == "Paused":
 		Running = True
-		count = True
 	elif Running:
 		Running = "Paused"
 
@@ -155,6 +151,7 @@ class Ui_MainWindow(object):
 
 	def __init__(self, MainWindow):
 		MainWindow.setObjectName("MainWindow")
+		MainWindow.setWindowIcon(QtGui.QIcon('icon.ico'))
 		MainWindow.setEnabled(True)
 		MainWindow.resize(980, 628)
 		sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -334,5 +331,5 @@ MainWindow.show()
 app.aboutToQuit.connect(Closing)
 timer = QtCore.QTimer()
 timer.timeout.connect(CurrentState)
-timer.start(100)
+timer.start(300)
 sys.exit(app.exec_())

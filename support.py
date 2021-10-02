@@ -1,33 +1,24 @@
 
-class SupportedApps(object):
+class SupportedApps():
 
-	"""
-	Class for supported apps:
-	AppCheck = Checks for AppName and AppTitle to save
-	AppSort = Check for AppTitle to seein what way to display data
-	AppRetrieve = Display data from specific app
-	"""
-
-	@staticmethod
 	def AppCheck(AppTitle, AppName, AppSplit):
-		if AppName == "Google Chrome":
+		if "Google Chrome" in AppName:
 			AppName = AppSplit[-2].split(" ")[-1]
-			AppTitle = AppSplit[-1]
+			AppTitle = "Google Chrome"
 
-		elif AppName == "Sublime Text":
+		elif "Sublime Text" in AppName:
 			try:
-				AppName = AppSplit[0].split(" ")[1]
+				AppName = AppSplit[0].split(" ")[1].replace("(", "").replace(")", "")
 				if AppName == "•":
 					AppName == "NoProject"
 			except:
 				AppName = "NoProject"
-			AppTitle = AppSplit[-1]
-		elif AppName == "Apply SQL Script to Database":
+			AppTitle = "Sublime Text"
+		elif "Apply SQL Script to Database" in AppName:
 			AppName = "MySQL Workbench"
 
 		return AppTitle, AppName
 
-	@staticmethod
 	def AppSort(x,y,z):
 		if y == "Sublime Text":
 			return (y, z)

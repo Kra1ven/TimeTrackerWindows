@@ -22,20 +22,10 @@ if not path.exists("TTW.db"):
 
 class DBhandle:
 
-	"""
-	Adding and extracting to/from DataBase
-	Available methods:
-	TimeNow - Machines local date and time
-	DBstore - Storing TimeNow and AppName + TimeSpent
-	DBextract - Extracting AppName + TimeSpent from specific dates
-	"""
-
-	@staticmethod
 	def DateToday():
 		Today = datetime.date.today()
 		return Today
 
-	@staticmethod
 	def DBstore(AppName, TimeSpent):
 		if len(AppName) == 0:
 			return
@@ -60,7 +50,6 @@ class DBhandle:
 			cursor.execute(DBupdate)
 			db.commit()
 
-	@staticmethod
 	def DBextract(DateRange):
 		db = sqlite3.connect("TTW.db")
 		cursor = db.cursor()
