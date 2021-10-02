@@ -74,20 +74,23 @@ class window(QWidget):
 		def __init__(self, parent=None):
 			QWidget.__init__(self, parent)
 
-			self.maxVal = float(list(data.values())[0])
-
-			if self.maxVal * 60 < 1:
-				self.set0 = QBarSet('Seconds')
-				self.set0.append([round(float(x) * 60 * 60, 1) for x in data.values()])
-				self.maxVal = round(self.maxVal * 60 * 60, 1)
-			elif self.maxVal < 1:
-				self.set0 = QBarSet('Minutes')
-				self.set0.append([round(float(x) * 60, 1) for x in data.values()])
-				self.maxVal = round(self.maxVal * 60, 1)
-			else:
-				self.set0 = QBarSet('Hours')
-				self.set0.append([round(float(x), 1) for x in data.values()])
-				self.maxVal = round(self.maxVal, 1)
+			try:
+				self.maxVal = float(list(data.values())[0])
+	
+				if self.maxVal * 60 < 1:
+					self.set0 = QBarSet('Seconds')
+					self.set0.append([round(float(x) * 60 * 60, 1) for x in data.values()])
+					self.maxVal = round(self.maxVal * 60 * 60, 1)
+				elif self.maxVal < 1:
+					self.set0 = QBarSet('Minutes')
+					self.set0.append([round(float(x) * 60, 1) for x in data.values()])
+					self.maxVal = round(self.maxVal * 60, 1)
+				else:
+					self.set0 = QBarSet('Hours')
+					self.set0.append([round(float(x), 1) for x in data.values()])
+					self.maxVal = round(self.maxVal, 1)
+			except:
+				self.set0 = QBarSet('NotEnoughData')
 			
 			self.series = QBarSeries()
 			self.series.append(self.set0)
