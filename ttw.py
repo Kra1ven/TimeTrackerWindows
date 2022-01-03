@@ -1,12 +1,10 @@
 from win32gui import GetWindowText, GetForegroundWindow
 import win32api
-import pyautogui
 import time
 import threading
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget)
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtChart import QChart, QChartView, QValueAxis, QBarCategoryAxis, QBarSet, QBarSeries
-from PyQt5.Qt import Qt
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import *
@@ -17,28 +15,26 @@ import math
 
 Running = True
 
+def saveTime(t0, app):
+	t1 = time.time()
+	thrd = threading.Thread(target=DBhandle.DBstore, args=(app.replace("'", ""), math.floor(t1-t0)))
+	thrd.start()
+	return time.time()
+
 def watchdog():
 	t0 = time.time()
 	while True:
-		x = GetWindowText(GetForegroundWindow())
+		app = GetWindowText(GetForegroundWindow())
 		time.sleep(1)
-		if x != GetWindowText(GetForegroundWindow()):
-			t1 = time.time()
-			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
-			thrd.start()
-			t0 = time.time()
+		if app != GetWindowText(GetForegroundWindow()):
+			t0 = saveTime(t0, app)
 		elif math.floor(time.time() - t0) >= 60:
-			t1 = time.time()
-			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
-			thrd.start()
-			t0 = time.time()
+			t0 = saveTime(t0, app)
 		elif Running == False:
-			t1 = time.time()
-			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
-			thrd.start()
+			t0 = saveTime(t0, app)
 			break
 		elif Running == "Paused" or Running == "Afk":
-			thrd = threading.Thread(target=DBhandle.DBstore, args=(x.replace("'", ""), math.floor(t1-t0)))
+			thrd = threading.Thread(target=DBhandle.DBstore, args=(app.replace("'", ""), math.floor(t1-t0)))
 			thrd.start()
 			while Running == "Paused" or Running == "Afk":
 				time.sleep(1)
@@ -48,12 +44,12 @@ def watchdog():
 def inputTrack():
 	global Running
 	while True:
-		x = (win32api.GetTickCount() - win32api.GetLastInputInfo()) / 1000
-		if x >= 1200:
+		last_input = (win32api.GetTickCount() - win32api.GetLastInputInfo()) / 1000
+		if last_input >= 1200:
 			Running = "Afk"
 		elif not Running:
 			break
-		elif x < 1200 and Running == "Afk":
+		elif last_input < 1200 and Running == "Afk":
 			Running = True
 		time.sleep(1)
 

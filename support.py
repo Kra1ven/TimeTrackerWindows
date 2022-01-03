@@ -14,18 +14,19 @@ class SupportedApps():
 			except:
 				AppName = "NoProject"
 			AppTitle = "Sublime Text"
+			
 		elif "Apply SQL Script to Database" in AppName:
 			AppName = "MySQL Workbench"
 
 		return AppTitle, AppName
 
-	def AppSort(x,y,z):
-		if y == "Sublime Text":
-			return (y, z)
-		elif y == "Google Chrome":
-			return (y, z)
+	def AppSort(AppTitle, AppName, AppSplit):
+		if AppName == "Sublime Text":
+			return (AppName, AppSplit)
+		elif AppName == "Google Chrome":
+			return (AppName, AppSplit)
 		else:
-			return (x, z)
+			return (AppTitle, AppSplit)
 
 	def AppRetrieve(App):
 		check = ["Google Chrome", "Sublime Text"]
